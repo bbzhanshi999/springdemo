@@ -5,6 +5,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
@@ -17,13 +19,13 @@ import org.thymeleaf.templatemode.TemplateMode;
 @Configuration
 @EnableWebMvc
 @ComponentScan("edu.nju.springdemo.app")
+@PropertySource("classpath:application.properties")
 public class AppConfig implements WebMvcConfigurer {
     @Autowired
     public ApplicationContext applicationContext;
 
-    /*:springmvc :  ?messageConveter
-    * ?拦截器 ?formatter
-    * */
+
+
 
 
     @Override
@@ -32,7 +34,9 @@ public class AppConfig implements WebMvcConfigurer {
         viewResolver.setTemplateEngine(templateEngine());
         // NOTE 'order' and 'viewNames' are optional
         viewResolver.setOrder(1);
-        viewResolver.setViewNames(new String[] {".html", ".xhtml"});
+        //在无其他模板引擎的情况下，不需要配置viewnames
+        //viewResolver.setViewNames(new String[] {".html", ".xhtml"});
+        viewResolver.setCharacterEncoding("UTF-8");
         registry.viewResolver(viewResolver);
     }
 
@@ -59,6 +63,7 @@ public class AppConfig implements WebMvcConfigurer {
         templateResolver.setApplicationContext(this.applicationContext);
         templateResolver.setPrefix("/WEB-INF/templates/");
         templateResolver.setSuffix(".html");
+        templateResolver.setCharacterEncoding("UTF-8");
         // HTML is the default value, added here for the sake of clarity.
         templateResolver.setTemplateMode(TemplateMode.HTML);
         // Template cache is true by default. Set to false if you want
@@ -77,9 +82,15 @@ public class AppConfig implements WebMvcConfigurer {
         //resourceLocations:资源位置
         // 示例：/static/js/jquery.js  /resource/js/jquery.js
         registry.addResourceHandler("/static/**")
-                .addResourceLocations("/resource/**")
+                .addResourceLocations("classpath:/static/")
                 .setCachePeriod(31536000);
     }
 
 
+    @Bean
+    public ResourceBundleMessageSource messageSource() {
+        ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+        messageSource.setBasename("application");
+        return messageSource;
+    }
 }

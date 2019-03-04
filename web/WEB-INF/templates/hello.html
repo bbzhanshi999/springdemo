@@ -3,8 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <title>hello</title>
+    <link rel="stylesheet"  th:href="@{/static/css/style.css}"  href="/static/css/style.css" />
+    <script th:src="@{/static/js/jquery.js}" src="/static/js/jquery.js"></script>
 </head>
 <body>
-    <h1>${content}</h1>
+    <h1 th:text="${content}"></h1>
+    <script>
+        $("<p class='nav'>动态文本</p>").appendTo("body");
+    </script>
+    <div>
+        <img src="/static/image/di.gif" alt="STSM logo" title="STSM logo"
+             th:src="@{/static/image/di.gif}" />
+
+        <h2 class="nav" th:text="#{app.title}" >aaa</h2>
+    </div>
+
+    <a th:href="@{/logout}" th:if="${session.user != null}">退出</a>
+    <table>
+        <tr>
+            <th>主键</th>
+            <th>用户名</th>
+            <th>角色</th>
+            <th>创建日期</th>
+        </tr>
+        <tr th:each="user : ${userList}">
+            <td th:text="${user.id}">0</td>
+            <td th:text="${user.username}">耶稣</td>
+            <td th:text="${user.role.roleName eq 'admin'}? (${user.username eq '王五'}?'超级管理员':'一般管理员'):'访客'">访客</td>
+            <td th:text="${#dates.format(user.date,'yyyy-MM-dd HH:mm:ss')}">今天</td>
+        </tr>
+
+    </table>
 </body>
 </html>
