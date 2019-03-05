@@ -12,6 +12,7 @@
     <input type="text" th:field="*{password}" />
     <input type="text" th:field="*{name}" />
     <input type="text" th:field="*{phone}" />
+    <input type="checkbox" th:each="r : *{roles}" th:value="${r.id}" th:id="${#ids.seq('name')}" />
     <input type="submit" />
 </form>
 </body>

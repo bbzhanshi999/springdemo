@@ -10,4 +10,9 @@ import lombok.NoArgsConstructor;
 @Data
 public class Role extends BaseModel {
     private String roleName;
+
+    public Role(Long id,String roleName) {
+        this.roleName = roleName;
+        this.id = id;
+    }
 }
