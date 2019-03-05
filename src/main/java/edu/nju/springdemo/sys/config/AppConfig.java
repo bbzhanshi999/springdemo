@@ -1,5 +1,11 @@
 package edu.nju.springdemo.sys.config;
 
+import com.alibaba.druid.pool.DruidDataSource;
+import com.github.pagehelper.PageInterceptor;
+import org.apache.ibatis.plugin.Interceptor;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.mybatis.spring.SqlSessionFactoryBean;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -7,6 +13,9 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
@@ -16,16 +25,19 @@ import org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver;
 import org.thymeleaf.spring5.view.ThymeleafViewResolver;
 import org.thymeleaf.templatemode.TemplateMode;
 
+import javax.sql.DataSource;
+import java.io.IOException;
+import java.util.Properties;
+
 @Configuration
 @EnableWebMvc
-@ComponentScan("edu.nju.springdemo.app")
+@ComponentScan("edu.nju.springdemo")
 @PropertySource("classpath:application.properties")
+@EnableTransactionManagement // <tx:annotation-driven />
+@MapperScan("edu.nju.springdemo.app.dao")//Mybatis mapper.class的位置
 public class AppConfig implements WebMvcConfigurer {
     @Autowired
     public ApplicationContext applicationContext;
-
-
-
 
 
     @Override
@@ -92,5 +104,38 @@ public class AppConfig implements WebMvcConfigurer {
         ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
         messageSource.setBasename("application");
         return messageSource;
+    }
+
+    @Bean
+    public DataSource dataSource(){
+        DruidDataSource druidDataSource = new DruidDataSource();
+        druidDataSource.setUsername("root");
+        druidDataSource.setUrl("jdbc:mysql://localhost:3306/hr?useUnicode=true&characterEncoding=utf8");
+        druidDataSource.setPassword("1234");
+        return druidDataSource;
+    }
+
+    @Bean
+    public DataSourceTransactionManager dataSourceTransactionManager(){
+        DataSourceTransactionManager transactionManager = new DataSourceTransactionManager();
+        transactionManager.setDataSource(dataSource());
+        return transactionManager;
+    }
+
+    @Bean
+    public SqlSessionFactory sessionFactory() throws Exception {
+        SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
+        factoryBean.setDataSource(dataSource());
+        factoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath:/mappers/*.xml"));
+        factoryBean.setConfigLocation(new PathMatchingResourcePatternResolver().getResource("classpath:/mybatis-config.xml"));
+
+        //设置分页插件
+        PageInterceptor pageInterceptor = new PageInterceptor();
+        Properties properties = new Properties();
+        properties.setProperty("helperDialect","mysql");
+        pageInterceptor.setProperties(properties);
+        factoryBean.setPlugins(new Interceptor[]{pageInterceptor});
+
+        return factoryBean.getObject();
     }
 }

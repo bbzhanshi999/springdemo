@@ -1,19 +1,24 @@
 package edu.nju.springdemo.app.model;
 
 
+import edu.nju.springdemo.sys.config.model.BaseModel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class User {
+public class User extends BaseModel {
 
-    private Integer id;
+
     private String username;
-    private Role role;
-    private Date date;
+    private String password;
+    private String name;
+    private String phone;
+
+    private List<Role> roles;
+
 }
